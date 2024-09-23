@@ -15,21 +15,21 @@ object JsoupExt {
 
   implicit class ElementExt[A <: Element](self:A) {
     def /(query:String) = self.select(query)
-    def cleanText():String =
+    def cleanText: String =
       TextCleaner.clean(self.text())
   }
 
   implicit class TextNodeExt[A <: nodes.TextNode](self:A) {
-    def cleanText():String =
+    def cleanText: String =
       TextCleaner.clean(self.text())
   }
 
   implicit class ElementsExt[A <: Elements](self:A) {
     def /(query:String) = self.select(query)
-    def firstOpt():Option[Element] = Option(self.first())
-    def lastOpt():Option[Element] = Option(self.last())
-    def firstOrDie():Element = firstOpt() getOrElse { throw new RuntimeException("element not found") }
-    def lastOrDie():Element = lastOpt() getOrElse { throw new RuntimeException("element not found") }
+    def firstOpt: Option[Element] = Option(self.first())
+    def lastOpt: Option[Element] = Option(self.last())
+    def firstOrDie: Element = firstOpt.getOrElse { throw new RuntimeException("element not found") }
+    def lastOrDie: Element = lastOpt.getOrElse { throw new RuntimeException("element not found") }
   }
 
   implicit def Elements2Collection(self:Elements) = self.asScala

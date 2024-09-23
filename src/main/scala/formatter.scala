@@ -50,7 +50,7 @@ class Layout(optimalWidth:Int, private var indentLevel:Int) {
     f(lines.last)
   }
 
-  private[this] def hasCurrentLineContent():Boolean =
+  private[this] def hasCurrentLineContent:Boolean =
     currentLine.nonEmpty && currentLine != " " * indentLevel
 
   def indent(n:Int):Unit = {

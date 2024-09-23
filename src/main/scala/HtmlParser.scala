@@ -53,9 +53,9 @@ object ScaladocHtmlParser {
     for {
       id <- extractTopLevelId(doc)
     } yield {
-      val kind:String = doc / "#signature > .modifier_kind > .kind" first() cleanText()
-      val signature = doc / "#signature" first() cleanText()
-      val comment = doc / "#comment" firstOpt() map(extractMarkup(_)) getOrElse Seq()
+      val kind:String = (doc / "#signature > .modifier_kind > .kind").first.cleanText
+      val signature = (doc / "#signature").first.cleanText
+      val comment = (doc / "#comment").firstOpt.map(extractMarkup(_)).getOrElse(Seq())
       id match {
         case tid:Id.Type =>
           Type(tid, languageName, TypeKind.forName(kind), signature, comment)
@@ -76,19 +76,19 @@ object ScaladocHtmlParser {
     val isObject = """.*\$\.html$""".r
     val parentId =
       (doc / "#owner > a").foldLeft[Id](Id.Root) {(parent, elm) =>
-        val name = elm.cleanText()
+        val name = elm.cleanText
         elm.attr("href") match {
           case isPackage() | isObject() =>
-            Id.ChildValue(parent, elm.cleanText())
+            Id.ChildValue(parent, elm.cleanText)
           case _ =>
-            Id.ChildType(parent, elm.cleanText())
+            Id.ChildType(parent, elm.cleanText)
         }
       }
     for {
-      localNameE <- doc / "#definition > h1" firstOpt()
-      localName = localNameE cleanText()
-      signatureE <- doc / "#signature > .modifier_kind .kind" firstOpt()
-      signature = signatureE cleanText()
+      localNameE <- (doc / "#definition > h1").firstOpt
+      localName = localNameE.cleanText
+      signatureE <- (doc / "#signature > .modifier_kind .kind").firstOpt
+      signature = signatureE.cleanText
     } yield {
       buildId(parentId, localName, signature)
     }
@@ -96,7 +96,7 @@ object ScaladocHtmlParser {
 
   def extractMembers(topId:Id, doc:Document):Seq[(String, Item)] = {
     doc / "#allMembers > div" flatMap {catElm =>
-      val categoryName = catElm / "h3" firstOrDie() cleanText()
+      val categoryName = (catElm / "h3").firstOrDie.cleanText
       if(categoryName == "Shadowed Implicit Value Members")
         Seq()
       else
@@ -108,13 +108,13 @@ object ScaladocHtmlParser {
 
   def extractMemberItem(topId:Id, elm:Element):Item = {
     val id = extractMemberId(topId, elm)
-    val kind = elm / ".signature > .modifier_kind > .kind" firstOrDie() cleanText()
+    val kind = (elm / ".signature > .modifier_kind > .kind").firstOrDie.cleanText
     val comment =
-      elm / "> .fullcomment" firstOpt() map(extractMarkup(_)) orElse {
-        elm / ".shortcomment" firstOpt() map(extractMarkup(_))
+      (elm / "> .fullcomment").firstOpt.map(extractMarkup(_)).orElse {
+        (elm / ".shortcomment").firstOpt.map(extractMarkup(_))
       } getOrElse Seq()
 
-    val signature = elm / ".signature" lastOrDie() cleanText()
+    val signature = (elm / ".signature").lastOrDie.cleanText
 
     id match {
       case tid:Id.Type =>
@@ -128,7 +128,7 @@ object ScaladocHtmlParser {
             val subId = elm / "> a:eq(1)" attr("id") replaceAll("""\.""", "/")
             val fullId = Id.ChildValue(vid.asInstanceOf[Id.Child].parentId, subId)
 
-            val permaLink = elm / "> .permalink > a" firstOpt() map(_.attr("href"))
+            val permaLink = (elm / "> .permalink > a").firstOpt.map(_.attr("href"))
 
             if(permaLink.isEmpty)
               DefinedMethod(fullId, languageName, params, resultType, signature, comment)
@@ -148,10 +148,10 @@ object ScaladocHtmlParser {
   }
 
   def extractMemberId(topId:Id, elm:Element):Id = {
-    val localName = elm / ".signature > .symbol .name" firstOpt() getOrElse {
-      elm / ".signature > .symbol .implicit" firstOrDie()
-    } cleanText()
-    val kind = elm / ".signature > .modifier_kind > .kind" firstOrDie() cleanText()
+    val localName = (elm / ".signature > .symbol .name").firstOpt.getOrElse {
+      (elm / ".signature > .symbol .implicit").firstOrDie
+    }.cleanText
+    val kind = (elm / ".signature > .modifier_kind > .kind").firstOrDie.cleanText
     buildId(topId, localName, kind)
   }
 
@@ -188,11 +188,11 @@ object JavadocHtmlParser17 {
 
   def extractToplevelItem(doc:Document):Option[Item] = {
     for {
-     _ <- doc / ".details" firstOpt()
+     _ <- (doc / ".details").firstOpt
      // compact classes has two subtitle: First one like "compact1, compact2, compact3"
      // Second subtitle is namespace.
-     ns <- doc / ".header > .subtitle" lastOpt() map(_.cleanText().split("""\."""))
-     sig <- doc / ".header > .title" firstOpt() map(_.cleanText())
+     ns <- (doc / ".header > .subtitle").lastOpt.map(_.cleanText.split("""\."""))
+     sig <- (doc / ".header > .title").firstOpt.map(_.cleanText)
     } yield {
       val nsId = ns.foldLeft[Id](Id.Root) {(parent, name) => Id.ChildValue(parent, name)}
       val sigR = """^(Class|Interface|Enum|Annotation Type)\s+([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)(<.*>)?$""".r
@@ -202,8 +202,8 @@ object JavadocHtmlParser17 {
           val id = Id.ChildType(nsId, name)
           // TODO: It may need more specialized version for javadoc.
           val comment =
-            doc / ".contentContainer > .description > .blockList > .blockList > .block" firstOpt() map(extractMarkup(_)) getOrElse Seq()
-          val detailedSig = doc / ".contentContainer > .description > .blockList > .blockList > pre" firstOrDie() cleanText()
+            (doc / ".contentContainer > .description > .blockList > .blockList > .block").firstOpt.map(extractMarkup(_)) getOrElse Seq()
+          val detailedSig = (doc / ".contentContainer > .description > .blockList > .blockList > pre").firstOrDie.cleanText
           // TODO: restructure TypeKind
           Type(id, languageName, TypeKind.Trait, detailedSig, comment)
         case _ =>
@@ -214,17 +214,17 @@ object JavadocHtmlParser17 {
 
   def extractMembers(topId:Id, doc:Document):Seq[(String, Item)] = {
     doc / ".details > ul.blocklist > li.blockList > ul.blocklist" flatMap {group =>
-      val categoryName = group / "> li > h3" firstOpt() map(_.cleanText()) getOrElse "(default category)"
+      val categoryName = (group / "> li > h3").firstOpt.map(_.cleanText) getOrElse "(default category)"
       val members = scala.collection.mutable.ArrayBuffer.empty[(String, Item)]
       var curName:String = null
-      (group / "> li.blockList").firstOrDie().childNodes().asScala.foreach {
+      (group / "> li.blockList").firstOrDie.childNodes.asScala.foreach {
         case Tag("a", a) =>
           curName = a.attr("name")
         case Tag("ul", ul) if(curName != null)=>
           // first 2 elements is header(method name and signature)
           val comment = ul / "> li > *:gt(1)" flatMap(extractMarkup(_))
           val id = Id.ChildValue(topId, curName)
-          val signature = ul / "> li > pre" firstOrDie() cleanText()
+          val signature = (ul / "> li > pre").firstOrDie.cleanText
           members += categoryName -> DefinedMethod(id, languageName, MethodParams(""), ResultType(""), signature, comment)
           curName = null
         case Tag("h3", _) =>
@@ -261,8 +261,8 @@ object JavadocHtmlParser16 {
 
   def extractToplevelItem(doc:Document):Option[Item] = {
     for {
-     ns <- doc / "body > h2 > font" firstOpt() map(_.cleanText().split("""\."""))
-     sig <- doc / "body > h2" firstOpt() map { h2 => h2.childNodes.asScala.collect { case t: TextNode =>  t.cleanText() } mkString("") }
+     ns <- (doc / "body > h2 > font").firstOpt.map(_.cleanText.split("""\."""))
+     sig <- (doc / "body > h2").firstOpt.map { h2 => h2.childNodes.asScala.collect { case t: TextNode =>  t.cleanText } mkString("") }
     } yield {
       val nsId = ns.foldLeft[Id](Id.Root) {(parent, name) => Id.ChildValue(parent, name)}
       val sigR = """^(Class|Interface|Enum|Annotation Type)\s+([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*)(<.*>)?$""".r
@@ -271,7 +271,7 @@ object JavadocHtmlParser16 {
         case sigR(kind, name, targs) =>
           val id = Id.ChildType(nsId, name)
           val comment = extractToplevelComment(doc)
-          val detailedSig = doc / "h2 ~ dl" / "dt > pre" firstOrDie() cleanText()
+          val detailedSig = (doc / "h2 ~ dl" / "dt > pre").firstOrDie.cleanText
           // TODO: restructure TypeKind
           Type(id, languageName, TypeKind.Trait, detailedSig, comment)
         case _ =>
@@ -282,7 +282,7 @@ object JavadocHtmlParser16 {
 
   def extractToplevelComment(doc: Document): Seq[Markup] = {
     var result = new scala.collection.mutable.ArrayBuffer[Markup]
-    var node: Node = doc / "h2 ~ hr ~ dl ~ p" firstOrDie()
+    var node: Node = (doc / "h2 ~ hr ~ dl ~ p").firstOrDie
 
     while(node != null) {
       result += Markup.Paragraph(extractMarkup(node))
@@ -293,17 +293,17 @@ object JavadocHtmlParser16 {
 
   def extractMembers(topId:Id, doc:Document):Seq[(String, Item)] = {
     doc / ".details > ul.blocklist > li.blockList > ul.blocklist" flatMap {group =>
-      val categoryName = group / "> li > h3" firstOpt() map(_.cleanText()) getOrElse "(default category)"
+      val categoryName = (group / "> li > h3").firstOpt.map(_.cleanText) getOrElse "(default category)"
       val members = scala.collection.mutable.ArrayBuffer.empty[(String, Item)]
       var curName:String = null
-      (group / "> li.blockList").firstOrDie().childNodes().asScala.foreach {
+      (group / "> li.blockList").firstOrDie.childNodes.asScala.foreach {
         case Tag("a", a) =>
           curName = a.attr("name")
         case Tag("ul", ul) if(curName != null)=>
           // first 2 elements is header(method name and signature)
           val comment = ul / "> li > *:gt(1)" flatMap(extractMarkup(_))
           val id = Id.ChildValue(topId, curName)
-          val signature = ul / "> li > pre" firstOrDie() cleanText()
+          val signature = (ul / "> li > pre").firstOrDie.cleanText
           members += categoryName -> DefinedMethod(id, languageName, MethodParams(""), ResultType(""), signature, comment)
           curName = null
         case Tag("h3", _) =>
@@ -347,7 +347,7 @@ class HtmlToMarkup(codeLanguage:String) {
     }
 
     elm.childNodes.asScala.collect {
-      case c:n.TextNode => Seq(Text(c.cleanText()))
+      case c:n.TextNode => Seq(Text(c.cleanText))
       case Tag("p", e) =>
         Seq(Paragraph(extract(e)))
       case Tag("dl", e) =>
@@ -379,7 +379,7 @@ class HtmlToMarkup(codeLanguage:String) {
       case Tag("i", e) =>
         Seq(Italic(extract(e)))
       case Tag("ol", e) if((e / "> li.cmt").size > 0) => // code example in scaladoc
-        e / "> li.cmt > p > code" firstOpt() map {oneline =>
+        (e / "> li.cmt > p > code").firstOpt.map {oneline =>
           Seq(Code(oneline.text(), codeLanguage))
         } getOrElse {
           Seq(Code(e / "> li.cmt > pre" text(), codeLanguage))
@@ -417,7 +417,7 @@ class HtmlToMarkup(codeLanguage:String) {
         Seq(Table(e / "tr,th" map {tr => TableRow(tr / "> td" map {td => TableColumn(extract(td))}) }))
       case e:Element => // Treat as text if unknown element
         unsupportedFeature("markup tag", e.toString)
-        Seq(Text(e.cleanText()))
+        Seq(Text(e.cleanText))
     }.flatten
   }
 
@@ -426,7 +426,7 @@ class HtmlToMarkup(codeLanguage:String) {
 
     // sometimes insane markup was found. Like <dl> <b> <dt>...</dt> <dd>...</dd> </b> </dl>
     if((dl / "> b").size > 0)
-      return extractDlMarkup(dl / "> b" firstOrDie())
+      return extractDlMarkup((dl / "> b").firstOrDie)
 
     var dtPrev:org.jsoup.nodes.Node = null
     val items = new scala.collection.mutable.ArrayBuffer[Markup.DlItem]
