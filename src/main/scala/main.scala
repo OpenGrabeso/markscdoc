@@ -1,12 +1,5 @@
 package com.todesking.nyandoc
 
-case class Exit(val code: Int) extends xsbti.Exit
-class Main extends xsbti.AppMain {
-  def run(config: xsbti.AppConfiguration) = {
-    Exit(Main.run(config.arguments))
-  }
-}
-
 object Maven {
   implicit class Tap[A](self: A) {
     def tapp(f: A => String = _.toString): A = {println(f(self)); self}
@@ -161,7 +154,7 @@ object Main {
     if(args.nonEmpty && args(0) == "--version") {
       println(s"Nyandoc ${Version.string}")
       0
-    } else if(args(0) == "--maven" && args.size >= 2) {
+    } else if(args.size >= 2 && args(0) == "--maven") {
       val rows = 20
       val query = args(1)
       val artifacts = Maven.findArtifacts(args(1), rows + 1)

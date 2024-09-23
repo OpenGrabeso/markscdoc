@@ -1,6 +1,6 @@
 # Nyandoc: scaladoc/javadoc HTML parser / document generator
 
-[日本語の解説を書きました](http://www.todesking.com/blog/2015-01-24-markdown-converter-for-javadoc-and-scaladoc/)
+Fork of https://github.com/todesking/nyandoc
 
 ## tl;dr
 
@@ -31,16 +31,6 @@ So I don't generate document from sources directly, but instead parse HTML and t
 	* Old-format(Java 1.6 or older) javadoc html
 	* Some html tags (ol, blockquote, table, image)
 	* Text layout engine is not support for fullwidth characters.
-
-## Install
-
-The project is packaged with [Conscript](https://github.com/n8han/conscript).
-
-Install `conscript` first, and
-
-```shell-session
-$ cs install todesking/nyandoc
-```
 
 ## Usage
 
