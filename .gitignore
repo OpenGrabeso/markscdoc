@@ -1,3 +1,5 @@
 target
 java.hprof.txt
 repo
+/.idea/
+/.bsp/

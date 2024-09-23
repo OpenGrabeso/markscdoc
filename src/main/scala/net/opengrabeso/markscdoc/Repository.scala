@@ -1,4 +1,4 @@
-package com.todesking.nyandoc
+package net.opengrabeso.markscdoc
 
 import LibGlobal._
 

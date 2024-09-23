@@ -1,4 +1,4 @@
-package com.todesking.nyandoc
+package net.opengrabeso.markscdoc
 
 object HtmlParser {
   import java.io.File

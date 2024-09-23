@@ -1,4 +1,4 @@
-package com.todesking.nyandoc
+package net.opengrabeso.markscdoc
 
 sealed abstract class Markup
 object Markup {

@@ -1,4 +1,4 @@
-package com.todesking.nyandoc
+package net.opengrabeso.markscdoc
 
 class Layout(optimalWidth:Int, private var indentLevel:Int) {
   import scala.collection.mutable

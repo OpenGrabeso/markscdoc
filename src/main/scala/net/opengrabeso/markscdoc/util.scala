@@ -1,4 +1,4 @@
-package com.todesking.nyandoc
+package net.opengrabeso.markscdoc
 
 object LibGlobal {
   def errorUnknown(name:String, unk:String) =

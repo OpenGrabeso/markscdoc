@@ -1,4 +1,4 @@
-# Nyandoc: scaladoc/javadoc HTML parser / document generator
+# Markscdoc: scaladoc/javadoc HTML parser / document generator
 
 Fork of https://github.com/todesking/nyandoc
 
@@ -37,7 +37,7 @@ So I don't generate document from sources directly, but instead parse HTML and t
 Currently, output format fixed to markdown.
 
 ```shell-session
-$ nyandoc <source-location> <dest-dir>
+$ Markscdoc <source-location> <dest-dir>
 ```
 
 or
@@ -53,11 +53,10 @@ File type is determined by its extension.
 ## Links
 
 * Scala API Documentation
-	* [2.11.5](http://scala-lang.org/download/2.11.5.html)
+	* [2.12.19](https://scala-lang.org/download/2.12.19.html)
 * JDK API Documentation
 	* [JDK8](http://www.oracle.com/technetwork/java/javase/documentation/jdk8-doc-downloads-2133158.html)
 	* [JDK7](http://www.oracle.com/technetwork/java/javase/documentation/java-se-7-doc-download-435117.html)
-	* [Japanese document(1.4 - 8)](http://www.oracle.com/technetwork/jp/java/java-sun-1440465-ja.html)
 * Java/Scala library documentation
 	* Jar-packed documents often found in [maven.org](http://search.maven.org)
 
@@ -97,7 +96,7 @@ At first,
 
 ![select-document-type](http://gyazo.todesking.com/081766c99138daccd741f3656860f637.png)
 
-and select `scala-2.11.2`
+and select `scala-2.12.19`
 
 ![select-document](http://gyazo.todesking.com/d06d318d4699b73a67fd0dad74120bf4.png)
 
